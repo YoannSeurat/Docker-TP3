@@ -1,0 +1,18 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/app
+
+- name: Launch app
+  community.docker.docker_container:
+    name: myapp
+    image: yoannseurat/backend:latest
+    networks:
+      - name: myapp-network
+    env:
+      DB_HOST: mydb
+      DB_USER: admin
+      DB_PASSWORD: secret
+      DB_NAME: myapp
+    state: started
+  vars:
+    ansible_python_interpreter: /opt/docker_venv/bin/python3

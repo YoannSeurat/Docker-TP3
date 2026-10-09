@@ -1,0 +1,17 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/database
+
+- name: Launch database
+  community.docker.docker_container:
+    name: mydb
+    image: postgres:16
+    networks:
+      - name: myapp-network
+    env:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: myapp
+    state: started
+  vars:
+    ansible_python_interpreter: /opt/docker_venv/bin/python3

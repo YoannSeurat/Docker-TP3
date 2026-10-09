@@ -1,0 +1,10 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/network
+
+- name: Create Docker network
+  community.docker.docker_network:
+    name: myapp-network
+    state: present
+  vars:
+    ansible_python_interpreter: /opt/docker_venv/bin/python3
