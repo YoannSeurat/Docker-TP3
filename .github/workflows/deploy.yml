@@ -9,7 +9,32 @@ on:
   workflow_dispatch:
 
 jobs:
+  install-ansible:
+    name: Install Ansible
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install Ansible
+        run: python -m pip install --upgrade ansible
+
+      - name: Verify Ansible installation
+        run: ansible-playbook --version
+
+      - name: Install Ansible collections
+        run: ansible-galaxy collection install -r ansible/requirements.yml
+
+      - name: Validate playbook syntax
+        run: ansible-playbook --syntax-check -i ansible/inventories/setup.yml ansible/playbook.yml
+
   deploy:
+    needs: install-ansible
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
