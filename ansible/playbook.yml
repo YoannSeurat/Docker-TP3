@@ -1,10 +1,11 @@
-- hosts: all
+---
+- name: Deploy the application stack
+  hosts: prod
   gather_facts: true
   become: true
   roles:
-    - docker
-    - network
-    - database
-    - app
-    - proxy
-
+    - role: docker
+    - role: network
+    - role: database
+    - role: app
+    - role: proxy

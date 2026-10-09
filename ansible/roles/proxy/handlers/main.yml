@@ -1,3 +1,7 @@
-#SPDX-License-Identifier: MIT-0
 ---
-# handlers file for roles/proxy
+- name: Restart proxy
+  community.docker.docker_container:
+    name: "{{ proxy_container_name }}"
+    restart: true
+  vars:
+    ansible_python_interpreter: /opt/docker_venv/bin/python3

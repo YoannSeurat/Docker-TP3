@@ -1,0 +1,20 @@
+ServerName localhost
+Listen 80
+
+LoadModule mpm_event_module modules/mod_mpm_event.so
+LoadModule authz_core_module modules/mod_authz_core.so
+LoadModule authz_host_module modules/mod_authz_host.so
+LoadModule proxy_module modules/mod_proxy.so
+LoadModule proxy_http_module modules/mod_proxy_http.so
+
+<VirtualHost *:80>
+    ProxyPreserveHost On
+    ProxyPass /api/ http://{{ app_container_name }}:{{ app_port }}/
+    ProxyPassReverse /api/ http://{{ app_container_name }}:{{ app_port }}/
+    ProxyPass / http://{{ app_container_name }}:{{ app_port }}/
+    ProxyPassReverse / http://{{ app_container_name }}:{{ app_port }}/
+
+    <Proxy "*">
+        Require all granted
+    </Proxy>
+</VirtualHost>

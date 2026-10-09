@@ -1,15 +1,28 @@
-#SPDX-License-Identifier: MIT-0
 ---
-# tasks file for roles/proxy
+- name: Create Apache proxy configuration directory
+  ansible.builtin.file:
+    path: /opt/{{ proxy_container_name }}
+    state: directory
+    mode: "0755"
 
-- name: Launch proxy
+- name: Install Apache proxy configuration
+  ansible.builtin.template:
+    src: httpd.conf.j2
+    dest: /opt/{{ proxy_container_name }}/httpd.conf
+    mode: "0644"
+  notify: Restart proxy
+
+- name: Run Apache reverse proxy
   community.docker.docker_container:
-    name: httpd
-    image: httpd:2.4
+    name: "{{ proxy_container_name }}"
+    image: "{{ proxy_image }}"
     networks:
-      - name: myapp-network
+      - name: "{{ docker_network_name }}"
     published_ports:
-      - "80:80"
+      - "{{ proxy_http_port }}:80"
+    volumes:
+      - "/opt/{{ proxy_container_name }}/httpd.conf:/usr/local/apache2/conf/httpd.conf:ro"
+    restart_policy: unless-stopped
     state: started
   vars:
     ansible_python_interpreter: /opt/docker_venv/bin/python3

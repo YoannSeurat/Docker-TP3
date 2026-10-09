@@ -2,17 +2,19 @@
 ---
 # tasks file for roles/app
 
-- name: Launch app
+- name: Run backend application
   community.docker.docker_container:
-    name: myapp
-    image: yoannseurat/backend:latest
+    name: "{{ app_container_name }}"
+    image: "{{ app_image }}"
     networks:
-      - name: myapp-network
+      - name: "{{ docker_network_name }}"
     env:
-      DB_HOST: mydb
-      DB_USER: admin
-      DB_PASSWORD: secret
-      DB_NAME: myapp
+      DB_HOST: "{{ database_container_name }}"
+      DB_PORT: "5432"
+      DB_USER: "{{ database_user }}"
+      DB_PASSWORD: "{{ database_password }}"
+      DB_NAME: "{{ database_name }}"
+    restart_policy: unless-stopped
     state: started
   vars:
     ansible_python_interpreter: /opt/docker_venv/bin/python3

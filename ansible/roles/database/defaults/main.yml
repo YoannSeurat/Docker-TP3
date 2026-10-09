@@ -1,0 +1,7 @@
+---
+database_container_name: mydb
+database_image: postgres:16
+database_volume_name: myapp-postgres-data
+database_user: admin
+database_password: "{{ lookup('env', 'POSTGRES_PASSWORD') }}"
+database_name: myapp

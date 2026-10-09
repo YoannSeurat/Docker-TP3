@@ -1,9 +1,9 @@
+---
 all:
-  vars:
-    ansible_user: admin
-    ansible_connection: local
   children:
     prod:
       hosts:
-        localhost:
-
+        server:
+          # Connection details are supplied explicitly on the command line.
+          # This avoids silently falling back to localhost when an environment
+          # variable is not available to Ansible.

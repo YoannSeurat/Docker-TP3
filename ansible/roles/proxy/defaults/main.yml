@@ -1,0 +1,4 @@
+---
+proxy_container_name: httpd
+proxy_image: httpd:2.4
+proxy_http_port: 80

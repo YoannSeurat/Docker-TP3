@@ -1,0 +1,4 @@
+---
+app_container_name: myapp
+app_image: yoannseurat/backend:latest
+app_port: 8080

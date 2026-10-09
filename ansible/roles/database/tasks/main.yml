@@ -2,16 +2,25 @@
 ---
 # tasks file for roles/database
 
-- name: Launch database
+- name: Require a database password
+  ansible.builtin.assert:
+    that:
+      - database_password
+    fail_msg: Set POSTGRES_PASSWORD.
+
+- name: Run PostgreSQL database
   community.docker.docker_container:
-    name: mydb
-    image: postgres:16
+    name: "{{ database_container_name }}"
+    image: "{{ database_image }}"
     networks:
-      - name: myapp-network
+      - name: "{{ docker_network_name }}"
     env:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: secret
-      POSTGRES_DB: myapp
+      POSTGRES_USER: "{{ database_user }}"
+      POSTGRES_PASSWORD: "{{ database_password }}"
+      POSTGRES_DB: "{{ database_name }}"
+    volumes:
+      - "{{ database_volume_name }}:/var/lib/postgresql/data"
+    restart_policy: unless-stopped
     state: started
   vars:
     ansible_python_interpreter: /opt/docker_venv/bin/python3
