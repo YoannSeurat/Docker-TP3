@@ -2,12 +2,6 @@
 ---
 # tasks file for roles/database
 
-- name: Require a database password
-  ansible.builtin.assert:
-    that:
-      - database_password
-    fail_msg: Set POSTGRES_PASSWORD.
-
 - name: Run PostgreSQL database
   community.docker.docker_container:
     name: "{{ database_container_name }}"

@@ -21,13 +21,18 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER || 'admin' }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: POSTGRES_PASSWORD
+          envs: POSTGRES_PASSWORD,DEPLOY_PATH,GITHUB_REPOSITORY
           script_stop: true
           script: |
             set -eu
-            cd ~/docker/TP3
-            git pull --ff-only
-            cd ansible
+            DEPLOY_PATH="${DEPLOY_PATH:-/home/admin/docker/TP3}"
+            if [ ! -d "$DEPLOY_PATH/.git" ]; then
+              mkdir -p "$(dirname "$DEPLOY_PATH")"
+              git clone "https://github.com/${GITHUB_REPOSITORY}.git" "$DEPLOY_PATH"
+            else
+              git -C "$DEPLOY_PATH" pull --ff-only
+            fi
+            cd "$DEPLOY_PATH/ansible"
             ansible-galaxy collection install -r requirements.yml
             export SERVER_HOST=localhost
             export ANSIBLE_CONNECTION=local
@@ -38,3 +43,5 @@ jobs:
               -e "database_password=$POSTGRES_PASSWORD"
         env:
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          GITHUB_REPOSITORY: ${{ github.repository }}

@@ -21,13 +21,25 @@
     dest: /etc/apt/keyrings/docker.asc
     mode: "0644"
 
-- name: Remove legacy Docker repository definition
-  ansible.builtin.apt_repository:
-    repo: >-
-      deb [arch={{ ansible_facts.architecture | replace('x86_64', 'amd64') }}]
-      https://download.docker.com/linux/{{ ansible_facts.distribution | lower }}
-      {{ ansible_facts.distribution_release }} stable
-    filename: docker
+- name: Find legacy Docker repository files
+  ansible.builtin.find:
+    paths: /etc/apt/sources.list.d
+    patterns:
+      - "*docker*.list"
+      - "*docker*.sources"
+    file_type: file
+  register: docker_repository_files
+
+- name: Remove legacy Docker repository files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ docker_repository_files.files }}"
+
+- name: Remove legacy Docker entries from the main APT sources file
+  ansible.builtin.lineinfile:
+    path: /etc/apt/sources.list
+    regexp: "^[^#].*download\\.docker\\.com.*$"
     state: absent
 
 - name: Configure Docker repository

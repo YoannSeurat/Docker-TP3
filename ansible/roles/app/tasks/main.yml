@@ -9,11 +9,11 @@
     networks:
       - name: "{{ docker_network_name }}"
     env:
-      DB_HOST: "{{ database_container_name }}"
-      DB_PORT: "5432"
-      DB_USER: "{{ database_user }}"
-      DB_PASSWORD: "{{ database_password }}"
-      DB_NAME: "{{ database_name }}"
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://{{ database_container_name }}:5432/{{ database_name }}"
+      SPRING_DATASOURCE_USERNAME: "{{ database_user }}"
+      SPRING_DATASOURCE_PASSWORD: "{{ database_password }}"
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
     restart_policy: unless-stopped
     state: started
   vars:

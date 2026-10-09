@@ -89,9 +89,15 @@ deployment, pass the database password from Ansible Vault or CI secrets.
 
 `.github/workflows/deploy.yml` deploys on backend/Ansible changes and can also
 be started manually. Configure `SERVER_HOST`, `SSH_PRIVATE_KEY`,
-`POSTGRES_PASSWORD`, and optionally `SERVER_USER` in GitHub Actions secrets.
-The remote checkout must already exist at `~/docker/TP3`, because the workflow
-updates it with `git pull --ff-only`.
+`POSTGRES_PASSWORD`, and optionally `SERVER_USER` and `DEPLOY_PATH` in GitHub
+Actions secrets. If `DEPLOY_PATH` is omitted, the workflow uses
+`/home/admin/docker/TP3`. The workflow clones the repository when that path
+does not exist, and otherwise updates it with `git pull --ff-only`.
+
+The remote server must already have Ansible, Git, sudo, and SSH access
+configured for the deployment user. The GitHub Actions runner installs neither
+Ansible nor the repository on the remote machine; the SSH script does that
+checkout and then runs Ansible on the server.
 
 The workflow does not magically detect every Docker Hub push: add a Docker Hub
 webhook that calls `workflow_dispatch` (or use a scheduled workflow) if that
