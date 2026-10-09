@@ -1,8 +1,9 @@
 all:
- vars:
-   ansible_user: admin
-   ansible_ssh_private_key_file: /home/yoann/docker/TP3/id_rsa
- children:
-   prod:
-     hosts: yoann.seurat.takima.school
+  vars:
+    ansible_user: admin
+    ansible_connection: local
+  children:
+    prod:
+      hosts:
+        localhost:
 

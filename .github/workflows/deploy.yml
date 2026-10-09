@@ -2,7 +2,8 @@ name: Deploy with Ansible
 
 on:
   push:
-    branches: [main]
+    paths:
+      - 'backend/**'
 
 jobs:
   deploy:
