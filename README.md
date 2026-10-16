@@ -19,6 +19,8 @@ Tous les conteneurs communiquent sur un réseau Docker dédié (`myapp-network`)
 .
 ├── .github/workflows/
 │   └── deploy.yml                  # Pipeline CI/CD (validation et déploiement SSH)
+├── ansible.cfg                     # Configuration Ansible par défaut (inventaire, clé SSH)
+├── deploy.sh                       # Script de déploiement simplifié (compatible WSL)
 └── ansible/
     ├── inventories/
     │   └── setup.yml               # Inventaire Ansible (groupe prod / hôte server)
@@ -43,14 +45,16 @@ Tous les conteneurs communiquent sur un réseau Docker dédié (`myapp-network`)
 
 ## Variables de configuration
 
-### Variables de connexion et secrets
+### Variables d'environnement (`.env`)
+
+Ces variables sont lues automatiquement par `ansible/inventories/setup.yml` et les rôles Ansible :
 
 | Variable | Description | Valeur par défaut |
 | --- | --- | --- |
-| `SERVER_HOST` | Adresse IP ou nom DNS du serveur cible | Requis |
+| `SERVER_HOST` | Adresse IP ou nom DNS du serveur cible | `yoann.seurat.takima.school` |
 | `ANSIBLE_USER` | Utilisateur SSH | `admin` |
 | `ANSIBLE_CONNECTION` | Mode de connexion (`ssh` ou `local`) | `ssh` |
-| `ANSIBLE_PRIVATE_KEY_FILE` | Chemin vers la clé privée SSH | Clé par défaut / agent SSH |
+| `ANSIBLE_PRIVATE_KEY_FILE` | Chemin vers la clé privée SSH | `./id_rsa` (via `ansible.cfg` / `deploy.sh`) |
 | `POSTGRES_PASSWORD` | Mot de passe de la base PostgreSQL | Requis |
 
 ### Variables des rôles (surchargeables)
@@ -73,37 +77,39 @@ Tous les conteneurs communiquent sur un réseau Docker dédié (`myapp-network`)
 
 ## Utilisation manuelle
 
-### Vérification de la syntaxe
+### 1. Configuration (`.env`)
 
-```bash
-ansible-playbook --syntax-check -i ansible/inventories/setup.yml ansible/playbook.yml
+Créez un fichier `.env` à la racine du projet (ignoré par Git) :
+
+```dotenv
+SERVER_HOST=yoann.seurat.takima.school
+ANSIBLE_USER=admin
+POSTGRES_PASSWORD=votre-mot-de-passe
 ```
 
-### Déploiement à distance via SSH
+Placez également votre clé privée SSH `id_rsa` à la racine du projet.
+
+### 2. Déploiement avec `deploy.sh`
+
+Le script `deploy.sh` charge automatiquement `.env`, configure `ANSIBLE_CONFIG`, ajuste les permissions de la clé SSH sous WSL (`/tmp/id_rsa_tp3` en `0600`) et lance le playbook :
 
 ```bash
-export SERVER_HOST="203.0.113.10"
-export ANSIBLE_USER="admin"
-export ANSIBLE_PRIVATE_KEY_FILE="$HOME/.ssh/id_rsa"
-export POSTGRES_PASSWORD="votre-mot-de-passe"
-
-ansible-playbook -i ansible/inventories/setup.yml ansible/playbook.yml \
-  -e "ansible_host=$SERVER_HOST" \
-  -e "ansible_user=$ANSIBLE_USER" \
-  -e "ansible_connection=ssh" \
-  -e "database_password=$POSTGRES_PASSWORD" \
-  --private-key "$ANSIBLE_PRIVATE_KEY_FILE"
+./deploy.sh
 ```
 
-### Exécution locale sur le serveur cible
+Vous pouvez aussi passer des arguments supplémentaires à `ansible-playbook` (par exemple `--syntax-check` ou `--check`) :
 
 ```bash
-export POSTGRES_PASSWORD="votre-mot-de-passe"
+./deploy.sh --syntax-check
+```
 
-ansible-playbook -i ansible/inventories/setup.yml ansible/playbook.yml \
-  -e "ansible_host=localhost" \
-  -e "ansible_connection=local" \
-  -e "database_password=$POSTGRES_PASSWORD"
+### 3. Exécution locale sur le serveur cible
+
+Si vous lancez le playbook directement depuis le serveur cible :
+
+```bash
+ANSIBLE_CONNECTION=local SERVER_HOST=localhost POSTGRES_PASSWORD="votre-mot-de-passe" \
+  ansible-playbook -i ansible/inventories/setup.yml ansible/playbook.yml
 ```
 
 Une fois le déploiement terminé, l'API est accessible sur `http://<SERVER_HOST>/` et `http://<SERVER_HOST>/api/`.
