@@ -4,6 +4,6 @@ all:
     prod:
       hosts:
         server:
-          # Connection details are supplied explicitly on the command line.
-          # This avoids silently falling back to localhost when an environment
-          # variable is not available to Ansible.
+          ansible_host: "{{ lookup('env', 'SERVER_HOST') | default('yoann.seurat.takima.school', true) }}"
+          ansible_user: "{{ lookup('env', 'ANSIBLE_USER') | default('admin', true) }}"
+          ansible_connection: "{{ lookup('env', 'ANSIBLE_CONNECTION') | default('ssh', true) }}"

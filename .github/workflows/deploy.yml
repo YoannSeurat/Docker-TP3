@@ -59,14 +59,8 @@ jobs:
             fi
             cd "$DEPLOY_PATH/ansible"
             ansible-galaxy collection install -r requirements.yml
-            export SERVER_HOST=localhost
-            export ANSIBLE_CONNECTION=local
             ansible-playbook --syntax-check -i inventories/setup.yml playbook.yml
             ansible-playbook -i inventories/setup.yml playbook.yml \
-              -e "ansible_host=$SERVER_HOST" \
-              -e "ansible_connection=$ANSIBLE_CONNECTION" \
-              -e "database_password=$POSTGRES_PASSWORD"
         env:
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
           GITHUB_REPOSITORY: ${{ github.repository }}
